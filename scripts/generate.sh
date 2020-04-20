@@ -100,6 +100,7 @@ add_auth_files() {
   WORK_DIR=$1
   add_extra_python_template "$WORK_DIR" auth
   add_extra_python_template "$WORK_DIR" password_flow_client
+  add_extra_python_template "$WORK_DIR" auth_api_client
 }
 
 fill_import_name_templates() {
