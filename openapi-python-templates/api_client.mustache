@@ -7,7 +7,7 @@ from httpx import AsyncClient, Request, Response
 from pydantic import ValidationError
 
 {{#apiInfo}}{{#apis}}from @IMPORT_NAME@.api.{{classVarName}} import Async{{classname}}, Sync{{classname}}
-{{/apis}}{{/apiInfo}}from @IMPORT_NAME@.exceptions import ResponseHandlingException, UnexpectedResponse
+{{/apis}}{{/apiInfo}}from @IMPORT_NAME@.exceptions import ResponseHandlingException, UnexpectedResponse, ResponseValidationError
 
 ClientT = TypeVar("ClientT", bound="ApiClient")
 
@@ -74,11 +74,11 @@ class ApiClient:
 
     async def send(self, request: Request, type_: Type[T]) -> T:
         response = await self.middleware(request, self.send_inner)
-        if response.status_code in [200, 201]:
+        if 200 <= response.status_code <= 299:
             try:
                 return parse_as_type(response.json(), type_)
             except ValidationError as e:
-                raise ResponseHandlingException(e)
+                raise ResponseValidationError.for_exception(e, response)
         raise UnexpectedResponse.for_response(response)
 
     async def send_inner(self, request: Request) -> Response:
