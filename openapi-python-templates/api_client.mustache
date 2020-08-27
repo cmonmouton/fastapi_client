@@ -75,6 +75,8 @@ class ApiClient:
     async def send(self, request: Request, type_: Type[T]) -> T:
         response = await self.middleware(request, self.send_inner)
         if 200 <= response.status_code <= 299:
+            if type_ is None:
+                return response
             try:
                 return parse_as_type(response.json(), type_)
             except ValidationError as e:
